@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REELIOO — Crypto Intelligence</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'JetBrains Mono', monospace; }
+  .display { font-family: 'Syne', sans-serif; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
+
+  /* Signal output formatting */
+  .signal-block { line-height: 1.9; }
+  .signal-block .signal-line { display: block; }
+  .signal-block .signal-buy  { color: #22c55e; font-weight: 700; font-size: 0.95rem; }
+  .signal-block .signal-wait { color: #f59e0b; font-weight: 700; font-size: 0.95rem; }
+  .signal-block .signal-avoid{ color: #ef4444; font-weight: 700; font-size: 0.95rem; }
+  .signal-block .signal-key  { color: #71717a; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .signal-block .signal-val  { color: #e4e4e7; }
+  .signal-block .signal-warn { color: #f59e0b; background: rgba(245,158,11,0.08); padding: 6px 10px; border-left: 2px solid #f59e0b; display: block; margin-top: 8px; font-size: 0.75rem; }
+  .signal-block .signal-disclaimer { color: #52525b; font-size: 0.7rem; margin-top: 10px; display: block; }
+
+  @keyframes thinking { 0%,100%{opacity:0.3} 50%{opacity:1} }
+  .thinking { animation: thinking 1.2s ease-in-out infinite; }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 h-screen flex flex-col overflow-hidden">
+
+<!-- NAV -->
+<nav class="flex items-center justify-between px-6 py-3 border-b border-zinc-800/60 shrink-0 bg-zinc-950/90 backdrop-blur">
+  <div class="flex items-center gap-3">
+    <div class="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <span class="display font-black text-base tracking-wider">
+      REELI<span class="text-emerald-400">OO</span>
+    </span>
+  </div>
+  <span class="text-zinc-600 text-xs tracking-widest uppercase hidden sm:block">Agentic Crypto Intelligence</span>
+  <div class="flex items-center gap-2">
+    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span class="text-emerald-400 text-xs font-medium">Live</span>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="flex flex-1 overflow-hidden">
+
+  <!-- LEFT: Chat -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Sub-header -->
+    <div class="px-5 py-2.5 bg-zinc-900/50 border-b border-zinc-800/60 shrink-0">
+      <p class="text-xs text-zinc-500 tracking-widest uppercase">
+        Mass · Velocity · Friction — market force analysis
+      </p>
+    </div>
+
+    <!-- Messages -->
+    <div class="flex-1 overflow-y-auto px-5 py-5 space-y-5" id="messages">
+
+      <!-- Welcome -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <p class="text-xs text-emerald-400 tracking-widest uppercase font-bold mb-2">Reelioo Ready</p>
+        <p class="text-sm text-zinc-400 leading-relaxed mb-4">
+          Ask me to analyse any crypto. I pull live Binance data, calculate
+          Mass and Velocity scores, then give you a BUY / WAIT / AVOID signal.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <form method="POST" action="/send" class="inline">
+            <button name="message" value="Analyse BTC right now"
+              class="text-xs text-emerald-400 border border-zinc-700 hover:border-emerald-500 hover:bg-emerald-500/5 px-3 py-1.5 rounded-lg transition-all bg-transparent cursor-pointer">
+              Analyse BTC
+            </button>
+          </form>
+          <form method="POST" action="/send" class="inline">
+            <button name="message" value="What is the signal for ETH?"
+              class="text-xs text-emerald-400 border border-zinc-700 hover:border-emerald-500 hover:bg-emerald-500/5 px-3 py-1.5 rounded-lg transition-all bg-transparent cursor-pointer">
+              Signal for ETH?
+            </button>
+          </form>
+          <form method="POST" action="/send" class="inline">
+            <button name="message" value="Is SOL worth trading today?"
+              class="text-xs text-emerald-400 border border-zinc-700 hover:border-emerald-500 hover:bg-emerald-500/5 px-3 py-1.5 rounded-lg transition-all bg-transparent cursor-pointer">
+              SOL today?
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Conversation -->
+      {% for msg in messages %}
+
+        {% if msg.type == 'human' %}
+        <div class="flex gap-3 items-start justify-end">
+          <div class="bg-zinc-800 rounded-xl rounded-tr-sm px-4 py-2.5 max-w-sm">
+            <p class="text-sm text-zinc-200">{{ msg.content }}</p>
+          </div>
+          <div class="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-xs text-zinc-400 font-bold">Y</span>
+          </div>
+        </div>
+
+        {% else %}
+        <div class="flex gap-3 items-start">
+          <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-0.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl rounded-tl-sm p-4">
+
+            {% set content = msg.content %}
+
+            {% if 'SIGNAL:' in content %}
+              <div class="signal-block text-sm">
+                {% for line in content.split('\n') %}
+                  {% if line.startswith('SIGNAL:') %}
+                    <span class="signal-line mb-2">
+                      <span class="signal-key">Signal  </span>
+                      {% if 'BUY' in line %}
+                        <span class="signal-buy">● BUY</span>
+                      {% elif 'AVOID' in line %}
+                        <span class="signal-avoid">● AVOID</span>
+                      {% else %}
+                        <span class="signal-wait">● WAIT</span>
+                      {% endif %}
+                    </span>
+                  {% elif line.startswith('CONFIDENCE:') %}
+                    <span class="signal-line"><span class="signal-key">Confidence  </span><span class="signal-val">{{ line.replace('CONFIDENCE:', '').strip() }}</span></span>
+                  {% elif line.startswith('MASS:') %}
+                    <span class="signal-line"><span class="signal-key">Mass  </span><span class="signal-val">{{ line.replace('MASS:', '').strip() }}</span></span>
+                  {% elif line.startswith('VELOCITY:') %}
+                    <span class="signal-line"><span class="signal-key">Velocity  </span><span class="signal-val">{{ line.replace('VELOCITY:', '').strip() }}</span></span>
+                  {% elif line.startswith('REASONING:') %}
+                    <span class="signal-line mt-2 block border-t border-zinc-800 pt-3"><span class="signal-key block mb-1">Reasoning</span><span class="signal-val text-zinc-300">{{ line.replace('REASONING:', '').strip() }}</span></span>
+                  {% elif 'VACUUM TRAP' in line or 'LOADING' in line %}
+                    <span class="signal-warn">⚠ {{ line }}</span>
+                  {% elif '⚠️' in line %}
+                    <span class="signal-disclaimer">{{ line }}</span>
+                  {% elif line.strip() %}
+                    <span class="signal-line signal-val">{{ line }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ content }}</p>
+            {% endif %}
+
+          </div>
+        </div>
+        {% endif %}
+
+      {% endfor %}
+
+      <div id="bottom"></div>
+    </div>
+
+    <!-- Input -->
+    <div class="shrink-0 border-t border-zinc-800/60 bg-zinc-900/50 px-5 py-3">
+      <form method="POST" action="/send" class="flex items-center gap-3">
+        <div class="flex-1 flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 focus-within:border-emerald-500/50 transition-colors">
+          <span class="text-emerald-500 text-xs font-bold shrink-0">›</span>
+          <input
+            type="text"
+            name="message"
+            placeholder="Ask about any crypto..."
+            required
+            autofocus
+            class="flex-1 bg-transparent outline-none text-sm text-zinc-100 placeholder-zinc-600 caret-emerald-400"
+          />
+        </div>
+        <button
+          type="submit"
+          class="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-bold px-4 py-2.5 rounded-xl transition-colors"
+        >
+          Analyse →
+        </button>
+      </form>
+      <div class="flex justify-between items-center mt-2 px-1">
+        <p class="text-xs text-zinc-700">Live Binance data · No financial advice</p>
+        <a href="/clear" class="text-xs text-zinc-700 hover:text-zinc-500 transition-colors">Clear chat</a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>document.getElementById('bottom').scrollIntoView();</script>
+
+</body>
+</html>
