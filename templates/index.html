@@ -65,7 +65,15 @@
   #messages {
     flex: 1; overflow-y: auto;
     padding: 1.5rem 0;
-    display: flex; flex-direction: column; gap: 1rem;
+    display: flex; flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Gap between every message bubble inside #chat */
+  #chat {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .welcome-card {
@@ -83,7 +91,11 @@
     border-radius: 8px; padding: 0.35rem 0.75rem;
     cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.02em;
   }
-  .quick-btn:hover { background: rgba(52,211,153,0.2); border-color: rgba(52,211,153,0.5); transform: translateY(-1px); }
+  .quick-btn:hover {
+    background: rgba(52,211,153,0.2);
+    border-color: rgba(52,211,153,0.5);
+    transform: translateY(-1px);
+  }
 
   .bubble-human {
     background: rgba(255,255,255,0.07);
@@ -218,8 +230,7 @@
                   hx-post="/send"
                   hx-vals='{"message": "Analyse BTC right now"}'
                   hx-target="#chat"
-                  hx-swap="beforeend show:#bottom:top"
-                  hx-on::after-request="document.querySelector('.input-field') && (document.querySelector('.input-field').value='')">
+                  hx-swap="beforeend show:#bottom:top">
             Analyse BTC
           </button>
           <button class="quick-btn"
@@ -240,11 +251,64 @@
       </div>
 
       <!--
-        #chat is where HTMX appends new message pairs.
-        On page load, Jinja2 renders session history here via _messages.html.
+        #chat holds all message bubbles.
+        Jinja2 renders session history here on page load (no {% include %} — inlined below).
+        HTMX appends new pairs here via beforeend.
       -->
       <div id="chat">
-        {% include "_messages.html" %}
+        {% for msg in messages %}
+
+          {% if msg.type == 'human' %}
+          <div class="flex gap-2.5 items-start justify-end">
+            <div class="bubble-human">
+              <p style="font-size:0.82rem;color:#d4d4d8;margin:0;">{{ msg.content }}</p>
+            </div>
+            <div class="avatar-human">Y</div>
+          </div>
+
+          {% else %}
+          <div class="flex gap-2.5 items-start">
+            <div class="avatar-ai mt-0.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#0d0f0e"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div class="bubble-ai">
+              {% set content = msg.content %}
+              {% if 'SIGNAL:' in content %}
+                <div class="signal-block" style="font-size:0.82rem;">
+                  {% for line in content.split('\n') %}
+                    {% if line.startswith('SIGNAL:') %}
+                      <span class="signal-line" style="margin-bottom:6px;">
+                        <span class="signal-key">Signal</span>
+                        {% if 'BUY' in line %}<span class="signal-buy">▲ BUY</span>
+                        {% elif 'AVOID' in line %}<span class="signal-avoid">▼ AVOID</span>
+                        {% else %}<span class="signal-wait">◆ WAIT</span>{% endif %}
+                      </span>
+                    {% elif line.startswith('CONFIDENCE:') %}
+                      <span class="signal-line"><span class="signal-key">Confidence</span><span class="signal-val">{{ line.replace('CONFIDENCE:', '').strip() }}</span></span>
+                    {% elif line.startswith('MASS:') %}
+                      <span class="signal-line"><span class="signal-key">Mass</span><span class="signal-val">{{ line.replace('MASS:', '').strip() }}</span></span>
+                    {% elif line.startswith('VELOCITY:') %}
+                      <span class="signal-line"><span class="signal-key">Velocity</span><span class="signal-val">{{ line.replace('VELOCITY:', '').strip() }}</span></span>
+                    {% elif line.startswith('REASONING:') %}
+                      <hr class="signal-divider">
+                      <span class="signal-line"><span class="signal-key" style="display:block;margin-bottom:4px;">Reasoning</span><span class="signal-val" style="color:#a1a1aa;">{{ line.replace('REASONING:', '').strip() }}</span></span>
+                    {% elif 'VACUUM TRAP' in line or 'LOADING' in line %}
+                      <span class="signal-warn">⚠ {{ line }}</span>
+                    {% elif '⚠️' in line %}
+                      <span class="signal-disclaimer">{{ line }}</span>
+                    {% elif line.strip() %}
+                      <span class="signal-line signal-val">{{ line }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p style="font-size:0.82rem;color:#a1a1aa;line-height:1.8;margin:0;white-space:pre-wrap;">{{ content }}</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+        {% endfor %}
       </div>
 
       <div id="bottom"></div>
@@ -252,12 +316,6 @@
 
     <!-- Input -->
     <div class="input-area">
-      <!--
-        hx-post="/send"              POST to /send — returns user bubble + thinking div instantly
-        hx-target="#chat"            drop the response into #chat
-        hx-swap="beforeend …"        append at bottom, scroll down
-        hx-on::after-request="…"     HTMX clears the input field after the request
-      -->
       <form hx-post="/send"
             hx-target="#chat"
             hx-swap="beforeend show:#bottom:top"
@@ -269,7 +327,6 @@
             type="text"
             name="message"
             placeholder="Ask about any crypto..."
-            required
             autofocus
             class="input-field"
           />
@@ -278,6 +335,11 @@
       </form>
       <div class="flex justify-between items-center mt-2">
         <p style="font-size:0.65rem;color:#3f3f46;letter-spacing:0.05em;">Live Binance · No financial advice</p>
+        <!--
+          hx-get="/clear"     clears the session on the server (returns 200 empty)
+          hx-target="#chat"   targets the chat div
+          hx-swap="innerHTML" replaces its contents with the empty response = chat cleared
+        -->
         <a href="#"
            hx-get="/clear"
            hx-target="#chat"

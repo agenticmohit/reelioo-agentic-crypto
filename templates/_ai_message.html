@@ -1,0 +1,41 @@
+{# This replaces the thinking div (outerHTML swap) once /think responds #}
+<div class="flex gap-2.5 items-start">
+  <div class="avatar-ai mt-0.5">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="#0d0f0e"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+  </div>
+  <div class="bubble-ai">
+
+    {% if 'SIGNAL:' in content %}
+      <div class="signal-block" style="font-size:0.82rem;">
+        {% for line in content.split('\n') %}
+          {% if line.startswith('SIGNAL:') %}
+            <span class="signal-line" style="margin-bottom:6px;">
+              <span class="signal-key">Signal</span>
+              {% if 'BUY' in line %}<span class="signal-buy">▲ BUY</span>
+              {% elif 'AVOID' in line %}<span class="signal-avoid">▼ AVOID</span>
+              {% else %}<span class="signal-wait">◆ WAIT</span>{% endif %}
+            </span>
+          {% elif line.startswith('CONFIDENCE:') %}
+            <span class="signal-line"><span class="signal-key">Confidence</span><span class="signal-val">{{ line.replace('CONFIDENCE:', '').strip() }}</span></span>
+          {% elif line.startswith('MASS:') %}
+            <span class="signal-line"><span class="signal-key">Mass</span><span class="signal-val">{{ line.replace('MASS:', '').strip() }}</span></span>
+          {% elif line.startswith('VELOCITY:') %}
+            <span class="signal-line"><span class="signal-key">Velocity</span><span class="signal-val">{{ line.replace('VELOCITY:', '').strip() }}</span></span>
+          {% elif line.startswith('REASONING:') %}
+            <hr class="signal-divider">
+            <span class="signal-line"><span class="signal-key" style="display:block;margin-bottom:4px;">Reasoning</span><span class="signal-val" style="color:#a1a1aa;">{{ line.replace('REASONING:', '').strip() }}</span></span>
+          {% elif 'VACUUM TRAP' in line or 'LOADING' in line %}
+            <span class="signal-warn">⚠ {{ line }}</span>
+          {% elif '⚠️' in line %}
+            <span class="signal-disclaimer">{{ line }}</span>
+          {% elif line.strip() %}
+            <span class="signal-line signal-val">{{ line }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="font-size:0.82rem;color:#a1a1aa;line-height:1.8;margin:0;white-space:pre-wrap;">{{ content }}</p>
+    {% endif %}
+
+  </div>
+</div>

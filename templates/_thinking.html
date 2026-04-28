@@ -1,0 +1,27 @@
+{# Step 1: user bubble — appears instantly #}
+<div class="flex gap-2.5 items-start justify-end">
+  <div class="bubble-human">
+    <p style="font-size:0.82rem;color:#d4d4d8;margin:0;">{{ user_query }}</p>
+  </div>
+  <div class="avatar-human">Y</div>
+</div>
+
+{#
+  Step 2: thinking bubble.
+  hx-trigger="load"  — fires the moment this element appears in the DOM
+  hx-post="/think"   — POSTs to /think with the query
+  hx-vals            — sends user_query as the "q" field (tojson handles quotes safely)
+  hx-swap="outerHTML"— the entire div is replaced with the AI response when /think replies
+#}
+<div class="flex gap-2.5 items-start"
+     hx-post="/think"
+     hx-vals='{{ {"q": user_query} | tojson }}'
+     hx-trigger="load"
+     hx-swap="outerHTML">
+  <div class="avatar-ai mt-0.5">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="#0d0f0e"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+  </div>
+  <div class="bubble-ai">
+    <span class="thinking" style="font-size:0.82rem;color:#52525b;">Fetching live data...</span>
+  </div>
+</div>

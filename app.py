@@ -7,7 +7,13 @@ from agent import agent
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-only-change-in-prod")
 
-limiter = Limiter(get_remote_address, app=app, default_limits=[])
+# storage_uri="memory://" silences the production warning
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
 
 
 @app.after_request
@@ -31,12 +37,12 @@ def index():
 @limiter.limit("20 per minute")
 def send():
     """
-    Returns IMMEDIATELY — no AI call here.
-    Renders the user bubble + a thinking indicator that auto-triggers /think.
+    Returns instantly — no AI call here.
+    Renders the user bubble + a thinking div that auto-triggers /think.
     """
     user_query = request.form.get("message", "").strip()
     if not user_query or len(user_query) > 500:
-        return "", 204
+        return "", 200
 
     session.setdefault("messages", [])
     session["messages"].append({"type": "human", "content": user_query})
@@ -54,7 +60,7 @@ def think():
     """
     user_query = request.form.get("q", "").strip()
     if not user_query or len(user_query) > 500:
-        return "", 204
+        return "", 200
 
     thread_id = session.get("thread_id", str(uuid.uuid4()))
 
@@ -77,7 +83,7 @@ def think():
 @app.route("/clear")
 def clear():
     session.clear()
-    return "", 204
+    return "", 200   # must be 200 so HTMX performs the innerHTML swap
 
 
 if __name__ == "__main__":
