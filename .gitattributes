@@ -1,0 +1,4 @@
+# Tell GitHub Linguist these are Jinja2 templates, not plain HTML.
+# Marking them non-detectable keeps the repo language bar showing Python.
+templates/*.html linguist-detectable=false
+screenshots/*.html linguist-detectable=false
