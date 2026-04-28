@@ -135,13 +135,4 @@ reelioo/
 
 ---
 
-## Security
-
-- OpenAI key stored as an environment variable — never in code
-- Rate limiting: 10 AI requests / minute per IP
-- Input validation: messages capped at 500 characters
-- Security headers on every response: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`
-
----
-
 *Built with LangChain · OpenAI · Binance API · No financial advice*
