@@ -9,7 +9,8 @@ def get_crypto_price(symbol: str):
         symbol = symbol + "USDT"
 
     response = requests.get(
-        f"https://api.binance.com/api/v3/ticker/24hr?symbol={symbol}",
+        "https://api.binance.com/api/v3/ticker/24hr",
+        params={"symbol": symbol},
         timeout=10
     )
     data = response.json()
