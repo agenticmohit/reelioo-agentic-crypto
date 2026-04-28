@@ -98,59 +98,19 @@ When volume is building above 180% of average but price is flat — Reelioo flag
 
 ---
 
-## Run Locally
+## Try It
 
-This project uses **uv** for dependency management.
+**Live app → [reelioo.app](https://reelioo.app)**
 
-**1. Clone the repo**
+Or run it yourself:
+
 ```bash
 git clone https://github.com/agenticmohit/reelioo.git
 cd reelioo
-```
-
-**2. Install dependencies**
-```bash
 uv sync
+cp .env.example .env        # add your OPENAI_API_KEY in .env
+uv run python app.py        # open http://localhost:5000
 ```
-
-**3. Add your keys**
-```bash
-cp .env.example .env
-```
-Open `.env` and set:
-```
-OPENAI_API_KEY=your_key_here
-FLASK_SECRET_KEY=any-long-random-string
-```
-
-**4. Run**
-
-In PyCharm — click **Run** on `app.py`
-
-Or in terminal:
-```bash
-uv run python app.py
-```
-
-**5. Open**
-```
-http://localhost:5000
-```
-
----
-
-## Deploy to Railway
-
-1. Push the repo to GitHub
-2. Create a new Railway project → **Deploy from GitHub repo**
-3. Set environment variables in the Railway dashboard:
-
-| Variable | Value |
-|---|---|
-| `OPENAI_API_KEY` | Your OpenAI key |
-| `FLASK_SECRET_KEY` | Any 32+ character random string |
-
-Railway auto-detects Python and serves with Gunicorn.
 
 ---
 
@@ -177,9 +137,8 @@ reelioo/
 
 ## Security
 
-- OpenAI key stored as Railway environment variable — never in code
-- Flask secret key from environment variable — signs all session cookies
-- Rate limiting: 10 AI requests / minute per IP (Flask-Limiter)
+- OpenAI key stored as an environment variable — never in code
+- Rate limiting: 10 AI requests / minute per IP
 - Input validation: messages capped at 500 characters
 - Security headers on every response: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`
 
